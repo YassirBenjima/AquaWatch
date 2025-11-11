@@ -1,0 +1,7 @@
+[2025-10-21 01:12:30] INFO: MQTT-Gateway connecté à mqtt://localhost:1883
+[2025-10-21 01:12:31] INFO: Souscrit au topic: sensors/data
+[2025-10-21 01:12:31] INFO: Souscrit au topic: sensors/alert
+[2025-10-21 01:13:07] INFO: 📥 Message reçu sur [sensors/data]: '{pH:7.1,temperature:23.4}'
+[2025-10-21 01:13:07] WARN: Message non JSON reçu
+[2025-10-21 01:13:46] INFO: 📥 Message reçu sur [sensors/data]: {"pH":7.1,"temperature":23.4}
+[2025-10-21 01:13:46] INFO: => pH: 7.1 | Température: 23.4°C
