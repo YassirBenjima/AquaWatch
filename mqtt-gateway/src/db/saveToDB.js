@@ -1,5 +1,6 @@
 import pkg from "pg";
 import config from "../config/config.js";
+import { logInfo, logError } from "../utils/logger.js";
 
 const { Pool } = pkg;
 
@@ -13,22 +14,24 @@ const pool = new Pool({
 
 // Test database connection
 pool.on("connect", () => {
-  console.log("[DB] ✅ Connexion à la base de données établie");
+  logInfo("[DB] ✅ Connexion à TimescaleDB établie");
 });
 
 pool.on("error", (err) => {
-  console.error(
-    "[DB] ❌ Erreur de connexion à la base de données:",
-    err.message
-  );
+  logError("[DB] ❌ Erreur de connexion à TimescaleDB:", err.message);
 });
 
+/**
+ * Sauvegarde les données du capteur dans TimescaleDB (séries temporelles)
+ * @param {object} data - Données normalisées du capteur
+ */
 export async function saveToDB(data) {
   const query = `
     INSERT INTO sensor_data
     (sensor_id, timestamp, pH, temperature, turbidity, conductivity, latitude, longitude)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
   `;
+
   const values = [
     data.sensor_id,
     data.timestamp,
@@ -41,9 +44,14 @@ export async function saveToDB(data) {
   ];
 
   try {
-    await pool.query(query, values);
-    console.log("[DB] ✅ Données insérées avec succès");
+    const result = await pool.query(query, values);
+    if (result.rowCount > 0) {
+      logInfo(
+        `[DB] ✅ Données insérées pour ${data.sensor_id} à ${data.timestamp}`
+      );
+    }
   } catch (err) {
-    console.error("[DB] ❌ Erreur d’insertion:", err.message);
+    logError(`[DB] ❌ Erreur d'insertion pour ${data.sensor_id}:`, err.message);
+    // Ne pas lancer l'erreur pour ne pas interrompre le traitement d'autres messages
   }
 }
