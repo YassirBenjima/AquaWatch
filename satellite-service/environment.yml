@@ -1,0 +1,17 @@
+name: satproc
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - gdal
+  - rasterio
+  - numpy
+  - shapely
+  - geopandas
+  - fiona
+  - rioxarray
+  - boto3
+  - pip
+  - pip:
+      - sentinelsat
+      - sentinelhub
