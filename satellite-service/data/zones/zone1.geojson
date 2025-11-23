@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zone 1 - Zone d'étude par défaut",
+        "description": "Zone d'étude pour le traitement des données satellite"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-6.0, 33.0],
+            [-5.0, 33.0],
+            [-5.0, 34.0],
+            [-6.0, 34.0],
+            [-6.0, 33.0]
+          ]
+        ]
+      }
+    }
+  ]
+}
