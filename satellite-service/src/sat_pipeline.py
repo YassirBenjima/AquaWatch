@@ -74,6 +74,37 @@ def main():
         zone_path = ZONE
         print(f"[INFO] Utilisation de la zone: {ZONE}")
 
+    import json
+    from datetime import datetime
+    
+    # 0️⃣ LOAD SCL (Scene Classification Layer)
+    try:
+        if zone_path:
+            scl = clip_band(load_band("SCL.tif"), zone_path)
+        else:
+            # Need rioxarray as fallback for direct load + mask if not clipped
+            import rioxarray as rxr
+            scl = rxr.open_rasterio(load_band("SCL.tif"), masked=True)
+            
+        # Create mask: SCL classes 8 (Cloud medium), 9 (Cloud high), 10 (Thin cirrus), 3 (Cloud shadows)
+        # Note: Depending on SCL processing, values might be different. 
+        # Standard L2A: 3=Shadow, 8=Medium, 9=High, 10=Cirrus
+        cloud_mask = np.isin(scl.values[0], [3, 8, 9, 10])
+        print(f"[INFO] Masque nuageux généré: {np.sum(cloud_mask)} pixels masqués")
+    except Exception as e:
+        print(f"[WARNING] Impossible de charger SCL.tif pour le masquage nuageux: {e}")
+        cloud_mask = None
+
+    # Helper function to apply mask
+    def apply_mask(data_array, mask):
+        if mask is None:
+            return data_array
+        # Create valid data mask only where NOT cloud
+        # Use NaN for float arrays
+        masked_data = data_array.copy()
+        masked_data[mask] = np.nan
+        return masked_data
+
     # 1️⃣ CLIP (or load full bands if no zone)
     if zone_path:
         b3 = clip_band(load_band("B03.tif"), zone_path)
@@ -93,22 +124,39 @@ def main():
         b4 = rxr.open_rasterio(load_band("B04.tif"), masked=True)
         b8a = rxr.open_rasterio(load_band("B8A.tif"), masked=True)
 
-    # 2️⃣ INDICES
-    ndwi_map = ndwi(b3.values[0], b8.values[0])
-    chl_map = chlorophyll(b5.values[0], b6.values[0])
-    turb_map = turbidity(b4.values[0], b8a.values[0])
+    # 2️⃣ INDICES CALCULATION
+    ndwi_raw = ndwi(b3.values[0], b8.values[0])
+    chl_raw = chlorophyll(b5.values[0], b6.values[0])
+    turb_raw = turbidity(b4.values[0], b8a.values[0])
+    
+    # 2.5 APPLY MASK
+    ndwi_map = apply_mask(ndwi_raw, cloud_mask)
+    chl_map = apply_mask(chl_raw, cloud_mask)
+    turb_map = apply_mask(turb_raw, cloud_mask)
 
     # 3️⃣ SAUVEGARDE LOCALE
     save_raster(OUT + "ndwi.tif", ndwi_map, load_band("B03.tif"))
     save_raster(OUT + "chlorophyll.tif", chl_map, load_band("B05.tif"))
     save_raster(OUT + "turbidity.tif", turb_map, load_band("B04.tif"))
+    
+    # 3.5 METADATA GENERATION
+    metadata = {
+        "processed_at": datetime.utcnow().isoformat(),
+        "zone": zone_path if zone_path else "full_scene",
+        "cloud_mask_applied": cloud_mask is not None,
+        "masked_pixels_count": int(np.sum(cloud_mask)) if cloud_mask is not None else 0,
+        "files": ["ndwi.tif", "chlorophyll.tif", "turbidity.tif"]
+    }
+    with open(OUT + "metadata.json", "w") as f:
+        json.dump(metadata, f, indent=2)
 
-    print("[LOCAL] OK fichiers generes")
+    print("[LOCAL] OK fichiers generes avec metadonnees")
 
     # 4️⃣ UPLOAD MINIO
     upload_to_minio(OUT + "ndwi.tif", "ndwi.tif", "satellite-indices")
     upload_to_minio(OUT + "chlorophyll.tif", "chlorophyll.tif", "satellite-indices")
     upload_to_minio(OUT + "turbidity.tif", "turbidity.tif", "satellite-indices")
+    upload_to_minio(OUT + "metadata.json", "metadata.json", "satellite-indices")
 
     print("[DONE] OK Pipeline termine")
 

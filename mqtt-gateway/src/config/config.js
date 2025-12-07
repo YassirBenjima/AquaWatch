@@ -10,6 +10,8 @@ export default {
   
   // Configuration MQTT (pour mode capteurs réels)
   MQTT_BROKER_URL: process.env.MQTT_BROKER_URL || "mqtt://localhost",
+  MQTT_USER: process.env.MQTT_USER,
+  MQTT_PASSWORD: process.env.MQTT_PASSWORD,
   MQTT_TOPIC: process.env.MQTT_TOPIC || "sensors/data",
   
   // Configuration CSV (pour mode dataset)

@@ -1,0 +1,11 @@
+{
+  "processed_at": "2025-12-07T00:02:09.434252",
+  "zone": "data/zones/zone1.geojson",
+  "cloud_mask_applied": false,
+  "masked_pixels_count": 0,
+  "files": [
+    "ndwi.tif",
+    "chlorophyll.tif",
+    "turbidity.tif"
+  ]
+}

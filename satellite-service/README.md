@@ -82,6 +82,25 @@ python src/sat_pipeline.py
 Le pipeline va:
 
 1. Découper les bandes selon la zone définie dans `data/zones/zone1.geojson`
-2. Calculer les indices (NDWI, Chlorophylle, Turbidité)
-3. Sauvegarder les résultats dans `outputs/`
-4. Uploader vers MinIO
+2. Masquer les nuages via la bande SCL (Scene Classification Layer)
+3. Calculer les indices (NDWI, Chlorophylle, Turbidité)
+4. Sauvegarder les résultats et les **métadonnées** dans `outputs/`
+5. Uploader vers MinIO
+
+## Automatisation (Scheduler)
+
+Pour lancer le traitement de manière périodique (ex: toutes les heures) :
+
+```bash
+python src/scheduler.py
+```
+
+Le scheduler vérifie l'intervalle défini (`CHECK_INTERVAL_MINUTES`) et lance le pipeline automatiquement.
+
+## Métadonnées
+
+Chaque exécution génère un fichier `metadata.json` contenant :
+- Date de traitement
+- Zone couverte
+- Statut du masquage nuageux (activé/désactivé)
+- Pourcentage de pixels masqués

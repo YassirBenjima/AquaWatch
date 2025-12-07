@@ -35,10 +35,10 @@ export async function saveToDB(data) {
   const values = [
     data.sensor_id,
     data.timestamp,
-    data.pH,
-    data.temperature,
-    data.turbidity,
-    data.conductivity,
+    data.sensors ? data.sensors.ph : data.pH,
+    data.sensors ? data.sensors.temperature : data.temperature,
+    data.sensors ? data.sensors.turbidity : data.turbidity,
+    data.sensors ? data.sensors.conductivity : data.conductivity,
     data.latitude,
     data.longitude,
   ];

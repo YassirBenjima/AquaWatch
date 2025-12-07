@@ -1,5 +1,6 @@
 import { updateSensorStatus } from "../services/sensorMonitor.js";
 import { parseMessage, normalizeData } from "../utils/validator.js";
+import { validateSensorData } from "../utils/validation.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { saveToDB } from "../db/saveToDB.js";
 
@@ -18,28 +19,27 @@ export async function handleMessage(topic, msg) {
       return;
     }
 
-    // Vérifier la présence du sensor_id
-    const sensorId = data.sensor_id || data.sensorId;
-    if (!sensorId) {
-      logWarn("[Message] ⚠️ Donnée reçue sans sensor_id");
+    // Normaliser d'abord pour avoir une structure cohérente (gestion des alias, KV plat -> imbriqué, ID par défaut)
+    const normalized = normalizeData(data);
+
+    // Validation des données Normalisées
+    if (!validateSensorData(normalized)) {
+      logWarn(`[Message] ⚠️ Données invalides (après normalisation) pour ${normalized.sensor_id}`);
       return;
     }
 
-    // Mettre à jour le statut du capteur (détection d'activité)
+    const sensorId = normalized.sensor_id;
     updateSensorStatus(sensorId);
 
     logInfo(`📥 Message reçu sur [${topic}] de ${sensorId}`);
 
-    // Normaliser les données (validation des plages, horodatage, géolocalisation)
-    const normalized = normalizeData(data);
-
     // Log des données normalisées
     const dataSummary = {
       timestamp: normalized.timestamp,
-      pH: normalized.pH,
-      temperature: normalized.temperature,
-      turbidity: normalized.turbidity,
-      conductivity: normalized.conductivity,
+      pH: normalized.sensors.ph,
+      temperature: normalized.sensors.temperature,
+      turbidity: normalized.sensors.turbidity,
+      conductivity: normalized.sensors.conductivity,
       location: `[${normalized.latitude}, ${normalized.longitude}]`,
     };
     logInfo(

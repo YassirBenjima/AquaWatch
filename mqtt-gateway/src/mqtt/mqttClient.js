@@ -5,6 +5,10 @@ import config from "../config/config.js";
 
 export function initMQTT() {
   const client = mqtt.connect(config.MQTT_BROKER_URL, {
+    // Authentification
+    username: config.MQTT_USER,
+    password: config.MQTT_PASSWORD,
+
     // Paramètres de reconnexion automatique
     reconnectPeriod: 5000, // Délai entre les tentatives de reconnexion (5 secondes)
     connectTimeout: 30 * 1000, // Timeout de connexion (30 secondes)

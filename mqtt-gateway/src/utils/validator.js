@@ -35,11 +35,16 @@ export function parseMessage(message) {
     const result = {};
 
     for (const pair of pairs) {
-      const colonIndex = pair.indexOf(":");
-      if (colonIndex === -1) continue;
+      // Support both : and = as separators
+      let separatorIndex = pair.indexOf(":");
+      if (separatorIndex === -1) {
+        separatorIndex = pair.indexOf("=");
+      }
+      
+      if (separatorIndex === -1) continue;
 
-      const key = pair.substring(0, colonIndex).trim();
-      const value = pair.substring(colonIndex + 1).trim();
+      const key = pair.substring(0, separatorIndex).trim();
+      const value = pair.substring(separatorIndex + 1).trim();
 
       if (key) {
         // Essayer de convertir en nombre si la valeur ressemble à un nombre
@@ -66,13 +71,20 @@ export function parseMessage(message) {
  * @returns {object} - Données normalisées
  */
 export function normalizeData(data) {
+  // Aliases mapping
+  const temperature = data.temperature !== undefined ? data.temperature : data.temp;
+  const ph = data.pH !== undefined ? data.pH : data.ph;
+  const sensorId = data.station_id || data.stationId || data.sensor_id || data.sensorId || "sensor_001"; // Unified ID
+
   return {
-    sensor_id: data.sensor_id || data.sensorId || "sensor_001",
+    sensor_id: sensorId,
     timestamp: data.timestamp || new Date().toISOString(),
-    pH: checkRange(data.pH, 0, 14),
-    temperature: checkRange(data.temperature, -10, 100),
-    turbidity: checkRange(data.turbidity, 0, 1000, true), // Turbidité en NTU (0-1000 NTU)
-    conductivity: checkRange(data.conductivity, 0, 100000, true), // Conductivité en µS/cm (0-100000)
+    sensors: {
+      ph: checkRange(ph, 0, 14),
+      temperature: checkRange(temperature, -10, 100),
+      turbidity: checkRange(data.turbidity, 0, 1000, true), // Turbidité en NTU (0-1000 NTU)
+      conductivity: checkRange(data.conductivity, 0, 100000, true), // Conductivité en µS/cm (0-100000)
+    },
     latitude: checkRange(data.latitude, -90, 90, false, 33.5731), // Latitude par défaut: Casablanca
     longitude: checkRange(data.longitude, -180, 180, false, -7.5898), // Longitude par défaut: Casablanca
   };
