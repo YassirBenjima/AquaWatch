@@ -40,6 +40,18 @@ services:
       timeout: 5s
       retries: 5
 
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: aquawatch_mqtt
+    ports:
+      - "1883:1883"
+      - "9002:9002"
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_config:/mosquitto/config
+    networks:
+      - aquawatch_net
+
 networks:
   aquawatch_net:
     driver: bridge
@@ -47,3 +59,5 @@ networks:
 volumes:
   minio_data:
   postgres_data:
+  mosquitto_data:
+  mosquitto_config:
