@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   minio:
     image: minio/minio:latest
@@ -67,6 +65,34 @@ services:
         condition: service_healthy
     networks:
       - aquawatch_net
+      
+  mqtt-gateway:
+    build: ./mqtt-gateway
+    container_name: aquawatch_gateway
+    depends_on:
+      - mosquitto
+      - timescaledb
+    environment:
+      - MQTT_BROKER_URL=mqtt://mosquitto:1883
+      - PG_HOST=aquawatch_db
+      - PG_PORT=5432
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_DB=aquawatch
+      - DATA_SOURCE=mqtt
+    networks:
+      - aquawatch_net
+
+  satellite-service:
+    build: ./satellite-service
+    container_name: aquawatch_satellite
+    depends_on:
+      - minio
+    env_file:
+      - ./satellite-service/.env
+    networks:
+      - aquawatch_net
+
 
 networks:
   aquawatch_net:
