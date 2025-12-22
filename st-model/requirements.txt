@@ -1,0 +1,8 @@
+torch
+numpy
+pandas
+psycopg2-binary
+schedule
+python-dotenv
+scipy
+sqlalchemy

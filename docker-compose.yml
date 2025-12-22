@@ -32,6 +32,7 @@ services:
       POSTGRES_DB: aquawatch
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - aquawatch_net
     healthcheck:
@@ -49,6 +50,21 @@ services:
     volumes:
       - mosquitto_data:/mosquitto/data
       - mosquitto_config:/mosquitto/config
+    networks:
+      - aquawatch_net
+
+  st-model:
+    build: ./st-model
+    container_name: aquawatch_stmodel
+    environment:
+      PG_HOST: aquawatch_db
+      PG_PORT: 5432
+      PG_USER: postgres
+      PG_PASSWORD: 1234
+      PG_DB: aquawatch
+    depends_on:
+      timescaledb:
+        condition: service_healthy
     networks:
       - aquawatch_net
 
