@@ -1,16 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { AlertTriangle, Droplets, Thermometer, Zap } from 'lucide-react';
 
-const MOCK_DATA = [
-    { time: '08:00', pH: 7.1, turbidity: 4 },
-    { time: '09:00', pH: 7.2, turbidity: 3 },
-    { time: '10:00', pH: 7.0, turbidity: 5 },
-    { time: '11:00', pH: 6.9, turbidity: 8 },
-    { time: '12:00', pH: 7.3, turbidity: 4 },
-    { time: '13:00', pH: 7.4, turbidity: 3 },
-    { time: '14:00', pH: 7.2, turbidity: 4 },
-];
+const API_URL = 'http://localhost:3001/api/history';
 
 const StatCard = ({ icon: Icon, label, value, unit, color }) => (
     <div className="glass-panel p-4 flex items-center justify-between mb-4 hover:bg-white/5 transition-colors">
@@ -25,6 +18,30 @@ const StatCard = ({ icon: Icon, label, value, unit, color }) => (
 );
 
 const Dashboard = () => {
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(API_URL);
+                // Format data for chart (e.g. format timestamp)
+                const formattedData = response.data.map(d => ({
+                    ...d,
+                    time: new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    // Map database columns to chart keys if needed (case sensitivity)
+                    pH: d.ph,
+                    turbidity: d.turbidity
+                }));
+                setData(formattedData);
+            } catch (error) {
+                console.error("Error fetching history:", error);
+            }
+        };
+
+        fetchData();
+        const interval = setInterval(fetchData, 5000); // Poll every 5s
+        return () => clearInterval(interval);
+    }, []);
     return (
         <div className="flex flex-col gap-6">
             {/* Stats Row */}
@@ -39,7 +56,7 @@ const Dashboard = () => {
                 <h3 className="text-sm font-semibold mb-4 text-secondary">Water Quality Trends</h3>
                 <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={MOCK_DATA}>
+                        <AreaChart data={data}>
                             <defs>
                                 <linearGradient id="colorPh" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#00f2fe" stopOpacity={0.8} />

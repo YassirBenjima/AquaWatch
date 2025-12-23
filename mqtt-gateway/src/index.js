@@ -1,6 +1,7 @@
 import { initMQTT } from "./mqtt/mqttClient.js";
 import { monitorSensors } from "./services/sensorMonitor.js";
 import { startCSVSimulation } from "./services/csvDataSimulator.js";
+import { startServer } from "./api/server.js";
 import { logInfo } from "./utils/logger.js";
 import config from "./config/config.js";
 
@@ -19,3 +20,6 @@ if (config.DATA_SOURCE === "csv") {
   initMQTT();
   monitorSensors(); // ✅ Active la surveillance des capteurs
 }
+
+// Start REST API
+startServer();
