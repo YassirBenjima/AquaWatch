@@ -20,7 +20,7 @@ services:
       retries: 3
 
   timescaledb:
-    image: timescale/timescaledb:latest-pg14
+    image: timescale/timescaledb-ha:pg14-latest
     container_name: aquawatch_db
     ports:
       - "5432:5432"
@@ -38,6 +38,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  geoserver:
+    image: kartoza/geoserver:2.24.0
+    container_name: aquawatch_geoserver
+    ports:
+      - "8080:8080"
+    volumes:
+      - geoserver_data:/opt/geoserver/data_dir
+    environment:
+      - GEOSERVER_ADMIN_USER=admin
+      - GEOSERVER_ADMIN_PASSWORD=geoserver
+    networks:
+      - aquawatch_net
+    depends_on:
+      timescaledb:
+        condition: service_healthy
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -112,6 +128,18 @@ services:
       - aquawatch_net
 
 
+
+  frontend:
+    build: ./frontend
+    container_name: aquawatch_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - aquawatch_net
+
 networks:
   aquawatch_net:
     driver: bridge
@@ -121,3 +149,4 @@ volumes:
   postgres_data:
   mosquitto_data:
   mosquitto_config:
+  geoserver_data:
