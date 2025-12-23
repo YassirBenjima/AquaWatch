@@ -47,7 +47,7 @@ services:
       - "9002:9002"
     volumes:
       - mosquitto_data:/mosquitto/data
-      - mosquitto_config:/mosquitto/config
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
     networks:
       - aquawatch_net
 

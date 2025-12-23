@@ -1,0 +1,11 @@
+__pycache__
+.ipynb_checkpoints
+*.pyc
+*.pyo
+venv
+.env
+data/
+outputs/
+logs/
+Dockerfile
+# Keep environment.yml and src
