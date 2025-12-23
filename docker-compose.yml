@@ -58,7 +58,7 @@ services:
       PG_HOST: aquawatch_db
       PG_PORT: 5432
       PG_USER: postgres
-      PG_PASSWORD: 1234
+      PG_PASSWORD: postgres
       PG_DB: aquawatch
     depends_on:
       timescaledb:
@@ -79,7 +79,7 @@ services:
       - PG_USER=postgres
       - PG_PASSWORD=postgres
       - PG_DB=aquawatch
-      - DATA_SOURCE=mqtt
+      - DATA_SOURCE=csv
     networks:
       - aquawatch_net
 
@@ -90,6 +90,24 @@ services:
       - minio
     env_file:
       - ./satellite-service/.env
+    networks:
+      - aquawatch_net
+
+  alert-service:
+    build: ./alert-service
+    container_name: aquawatch_alert
+    depends_on:
+      - mosquitto
+      - timescaledb
+    env_file:
+      - ./alert-service/.env
+    environment:
+      - MQTT_BROKER_URL=mqtt://mosquitto:1883
+      - PG_HOST=aquawatch_db
+      - PG_PORT=5432
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_DB=aquawatch
     networks:
       - aquawatch_net
 

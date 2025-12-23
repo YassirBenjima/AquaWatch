@@ -1,1 +1,15 @@
 .vscode
+
+# Secrets
+.env
+**/.env
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+
+# Docker / Build
+outputs/
+data/
+*.log
