@@ -141,6 +141,21 @@ class DataLoader:
         
         return tensor_np
 
+
+    def save_forecast(self, predicted_val, model_name="convlstm"):
+        """Save the maximum predicted turbidity to the database."""
+        if self.engine is None:
+            self.connect()
+            
+        try:
+            from sqlalchemy import text
+            query = text("INSERT INTO forecasts (timestamp, predicted_turbidity, model_name) VALUES (NOW(), :val, :model)")
+            with self.engine.begin() as connection:
+                connection.execute(query, {"val": float(predicted_val), "model": model_name})
+            print(f"[STModel] ✅ Saved forecast ({model_name}) to DB: {predicted_val:.2f}")
+        except Exception as e:
+            print(f"[STModel] Error saving forecast: {e}")
+
     def close(self):
         if self.engine:
             self.engine.dispose()

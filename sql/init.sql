@@ -10,7 +10,13 @@ CREATE TABLE IF NOT EXISTS sensor_data (
     conductivity FLOAT,
     latitude FLOAT,
     longitude FLOAT,
-    geom GEOMETRY(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)) STORED
+
+CREATE TABLE IF NOT EXISTS forecasts (
+    id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMPTZ NOT NULL,
+    predicted_turbidity DOUBLE PRECISION,
+    model_name VARCHAR(50) DEFAULT 'convlstm',
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 SELECT create_hypertable('sensor_data', 'timestamp', if_not_exists => TRUE);

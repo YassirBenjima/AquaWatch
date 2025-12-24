@@ -36,6 +36,30 @@ app.get('/api/history', async (req, res) => {
     }
 });
 
+// Endpoint to get latest forecast
+app.get('/api/forecast', async (req, res) => {
+    try {
+        // Get latest forecast for EACH model
+        const query = `
+            SELECT DISTINCT ON (model_name) * 
+            FROM forecasts 
+            ORDER BY model_name, timestamp DESC
+        `;
+        const result = await pool.query(query);
+
+        // Transform into dictionary: { convlstm: val, random_forest: val }
+        const response = {};
+        result.rows.forEach(row => {
+            response[row.model_name] = row.predicted_turbidity;
+        });
+
+        res.json(response);
+    } catch (err) {
+        logError('Error fetching forecast:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 export const startServer = () => {
     app.listen(PORT, () => {
         logInfo(`🚀 API Server listening on port ${PORT}`);
