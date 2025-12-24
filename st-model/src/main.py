@@ -31,11 +31,30 @@ def run_prediction_cycle():
                     print(f"[STModel] [ALERT] High Turbidity Predicted! Max: {max_val:.2f}")
                 else:
                     print(f"[STModel] Forecast Normal. Max: {max_val:.2f}")
+                
+                # Save to DB
+                loader.save_forecast(max_val)
             else:
                 print("[STModel] Failed to prepare input tensor (insufficient data?).")
 
         except Exception as e:
             print(f"[STModel] Error during processing: {e}")
+            import traceback
+            traceback.print_exc()
+
+        # --- RANDOM FOREST MODEL ---
+        try:
+            from src.rf_model import RFModel
+            rf = RFModel()
+            rf_pred = rf.train_and_predict(df)
+            
+            if rf_pred is not None:
+                print(f"[RFModel] Prediction: {rf_pred:.2f}")
+                loader.save_forecast(rf_pred, model_name="random_forest")
+            else:
+                print("[RFModel] Could not generate prediction.")
+        except Exception as e:
+            print(f"[RFModel] Error: {e}")
             import traceback
             traceback.print_exc()
 

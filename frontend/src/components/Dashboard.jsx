@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { AlertTriangle, Droplets, Thermometer, Zap } from 'lucide-react';
+import { AlertTriangle, Droplets, Thermometer, Zap, BrainCircuit, Trees } from 'lucide-react';
 
 const API_URL = 'http://localhost:3001/api/history';
+const FORECAST_URL = 'http://localhost:3001/api/forecast';
 
 const StatCard = ({ icon: Icon, label, value, unit, color }) => (
     <div className="glass-panel p-4 flex items-center justify-between mb-4 hover:bg-white/5 transition-colors">
@@ -19,22 +20,31 @@ const StatCard = ({ icon: Icon, label, value, unit, color }) => (
 
 const Dashboard = () => {
     const [data, setData] = useState([]);
+    const [forecast, setForecast] = useState({ convlstm: null, random_forest: null });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(API_URL);
-                // Format data for chart (e.g. format timestamp)
-                const formattedData = response.data.map(d => ({
+                // Fetch History
+                const historyRes = await axios.get(API_URL);
+                const formattedData = historyRes.data.map(d => ({
                     ...d,
                     time: new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    // Map database columns to chart keys if needed (case sensitivity)
                     pH: d.ph,
                     turbidity: d.turbidity
                 }));
                 setData(formattedData);
+
+                // Fetch Forecast
+                const forecastRes = await axios.get(FORECAST_URL);
+                if (forecastRes.data) {
+                    setForecast({
+                        convlstm: forecastRes.data.convlstm || null,
+                        random_forest: forecastRes.data.random_forest || null
+                    });
+                }
             } catch (error) {
-                console.error("Error fetching history:", error);
+                console.error("Error fetching data:", error);
             }
         };
 
@@ -42,6 +52,7 @@ const Dashboard = () => {
         const interval = setInterval(fetchData, 5000); // Poll every 5s
         return () => clearInterval(interval);
     }, []);
+
     return (
         <div className="flex flex-col gap-6">
             {/* Stats Row */}
@@ -49,6 +60,32 @@ const Dashboard = () => {
                 <StatCard icon={Droplets} label="Avg pH Level" value="7.2" unit="pH" color="#00f2fe" />
                 <StatCard icon={Thermometer} label="Water Temp" value="22.5" unit="°C" color="#ffbf00" />
                 <StatCard icon={Zap} label="Turbidity" value="4.1" unit="NTU" color="#ff0055" />
+
+                {/* AI Forecast Card (ConvLSTM) */}
+                <div className="glass-panel p-4 flex items-center justify-between mb-4 hover:bg-white/5 transition-colors border border-purple-500/30">
+                    <div>
+                        <p className="text-purple-300 text-sm">AI Forecast (ConvLSTM)</p>
+                        <p className="text-2xl font-bold mt-1 text-purple-100">
+                            {forecast.convlstm ? Math.max(0, forecast.convlstm).toFixed(2) : '--'} <span className="text-sm text-purple-300 font-normal">NTU</span>
+                        </p>
+                    </div>
+                    <div className="p-3 rounded-full bg-purple-500/20 text-purple-400">
+                        <BrainCircuit className="w-6 h-6" />
+                    </div>
+                </div>
+
+                {/* Random Forest Forecast Card */}
+                <div className="glass-panel p-4 flex items-center justify-between mb-4 hover:bg-white/5 transition-colors border border-green-500/30">
+                    <div>
+                        <p className="text-green-300 text-sm">RF Forecast (Random Forest)</p>
+                        <p className="text-2xl font-bold mt-1 text-green-100">
+                            {forecast.random_forest ? Math.max(0, forecast.random_forest).toFixed(2) : '--'} <span className="text-sm text-green-300 font-normal">NTU</span>
+                        </p>
+                    </div>
+                    <div className="p-3 rounded-full bg-green-500/20 text-green-400">
+                        <Trees className="w-6 h-6" />
+                    </div>
+                </div>
             </div>
 
             {/* Charts */}
