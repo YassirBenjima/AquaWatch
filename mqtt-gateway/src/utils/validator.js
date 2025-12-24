@@ -40,7 +40,7 @@ export function parseMessage(message) {
       if (separatorIndex === -1) {
         separatorIndex = pair.indexOf("=");
       }
-      
+
       if (separatorIndex === -1) continue;
 
       const key = pair.substring(0, separatorIndex).trim();
@@ -70,11 +70,29 @@ export function parseMessage(message) {
  * @param {object} data - Données brutes du capteur
  * @returns {object} - Données normalisées
  */
+// Hardcoded locations for simulated sensors to make the map interesting
+const SENSOR_LOCATIONS = {
+  "sensor_001": { lat: 33.5731, lon: -7.5898 }, // Casablanca
+  "sensor_002": { lat: 33.6931, lon: -7.3998 }, // Mohammedia
+  "sensor_003": { lat: 33.5231, lon: -7.7898 }, // Dar Bouazza
+  "sensor_004": { lat: 34.0209, lon: -6.8416 }, // Rabat (Our 4th Sensor)
+  "sensor_005": { lat: 33.2333, lon: -8.5000 }, // El Jadida
+};
+
 export function normalizeData(data) {
   // Aliases mapping
   const temperature = data.temperature !== undefined ? data.temperature : data.temp;
   const ph = data.pH !== undefined ? data.pH : data.ph;
   const sensorId = data.station_id || data.stationId || data.sensor_id || data.sensorId || "sensor_001"; // Unified ID
+
+  // Determine default location based on Sensor ID
+  let defaultLat = 33.5731;
+  let defaultLon = -7.5898;
+
+  if (SENSOR_LOCATIONS[sensorId]) {
+    defaultLat = SENSOR_LOCATIONS[sensorId].lat;
+    defaultLon = SENSOR_LOCATIONS[sensorId].lon;
+  }
 
   return {
     sensor_id: sensorId,
@@ -85,8 +103,8 @@ export function normalizeData(data) {
       turbidity: checkRange(data.turbidity, 0, 1000, true), // Turbidité en NTU (0-1000 NTU)
       conductivity: checkRange(data.conductivity, 0, 100000, true), // Conductivité en µS/cm (0-100000)
     },
-    latitude: checkRange(data.latitude, -90, 90, false, 33.5731), // Latitude par défaut: Casablanca
-    longitude: checkRange(data.longitude, -180, 180, false, -7.5898), // Longitude par défaut: Casablanca
+    latitude: checkRange(data.latitude, -90, 90, false, defaultLat),
+    longitude: checkRange(data.longitude, -180, 180, false, defaultLon),
   };
 }
 

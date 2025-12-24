@@ -39,7 +39,7 @@ class DataLoader:
         
         # Schema matching mqtt-gateway: sensor_id, timestamp, turbidity, latitude, longitude
         query = f"""
-            SELECT timestamp, latitude, longitude, turbidity
+            SELECT timestamp, latitude, longitude, turbidity, pH as ph
             FROM sensor_data 
             WHERE timestamp > NOW() - INTERVAL '{hours} hours'
             ORDER BY timestamp ASC;
