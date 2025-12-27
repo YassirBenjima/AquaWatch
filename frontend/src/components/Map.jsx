@@ -30,19 +30,27 @@ const SENSORS = [
     { id: 'sensor_003', lat: 33.5720, lng: -7.5920, name: 'Station Gamma' },
 ];
 
+import { useTheme } from '../context/ThemeContext';
+
 const Map = () => {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
     return (
         <MapContainer
             center={[33.5731, -7.5898]}
             zoom={15}
             scrollWheelZoom={true}
             className="w-full h-full"
-            style={{ background: '#020617' }} // Matches dark theme
+            style={{ background: isDark ? '#020617' : '#f0f9ff' }}
         >
-            {/* Dark Matter Base Map */}
+            {/* Base Map (Switches based on Theme) */}
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url={isDark
+                    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                }
             />
 
             {/* GeoServer Zones Layer (WMS) */}

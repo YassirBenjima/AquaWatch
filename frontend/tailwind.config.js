@@ -4,18 +4,19 @@ export default {
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
+    darkMode: 'class',
     theme: {
         extend: {
             colors: {
-                primary: '#00f2fe',
-                'primary-dark': '#4facfe',
-                accent: '#ff0055',
-                success: '#00ff9d',
-                warning: '#ffbf00',
-                'bg-dark': '#0f172a',
-                'bg-darker': '#020617',
-                'text-primary': '#f8fafc',
-                'text-secondary': '#94a3b8',
+                primary: 'var(--color-primary)',
+                'primary-dark': 'var(--color-primary-dark)',
+                accent: 'var(--color-accent)',
+                success: 'var(--color-success)',
+                warning: 'var(--color-warning)',
+                'bg-dark': 'var(--bg-card)', // Semantic Mapping
+                'bg-darker': 'var(--bg-main)', // Semantic Mapping
+                'text-primary': 'var(--text-primary)',
+                'text-secondary': 'var(--text-secondary)',
             },
             fontFamily: {
                 main: ['Outfit', 'sans-serif'],

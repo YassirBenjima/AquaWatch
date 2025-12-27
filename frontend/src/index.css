@@ -1,33 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=outfit:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=outfit:wght@300;400;500;600;700&display=swap');
-
 
 :root {
-  /* Brand Colors */
+  /* Common Brand Colors */
   --color-primary: #00f2fe;
   --color-primary-dark: #4facfe;
   --color-accent: #ff0055;
   --color-success: #00ff9d;
   --color-warning: #ffbf00;
 
-  /* Backgrounds */
-  --bg-dark: #0f172a;
-  --bg-darker: #020617;
+  /* Font */
+  --font-main: 'Outfit', sans-serif;
+}
 
-  /* Glassmorphism */
+/* Light Mode (Default) */
+:root {
+  --bg-main: #f0f9ff;
+  /* Light blue/white background */
+  --bg-card: #ffffff;
+  /* Pure white for panels */
+  --text-primary: #0f172a;
+  /* Dark Slate */
+  --text-secondary: #64748b;
+  /* Slate 500 */
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-highlight: rgba(0, 0, 0, 0.05);
+
+  /* Background Gradient for Light Mode */
+  --data-bg-image: radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.05) 0%, transparent 40%);
+}
+
+/* Dark Mode */
+.dark {
+  --bg-main: #020617;
+  --bg-card: #0f172a;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+
   --glass-bg: rgba(15, 23, 42, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-highlight: rgba(255, 255, 255, 0.05);
 
-  /* Text */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-
-  /* Font */
-  --font-main: 'Outfit', sans-serif;
+  --data-bg-image: radial-gradient(circle at 10% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.05) 0%, transparent 40%);
 }
 
 * {
@@ -38,12 +60,10 @@
 
 body {
   font-family: var(--font-main);
-  background-color: var(--bg-darker);
+  background-color: var(--bg-main);
   color: var(--text-primary);
   /* Mesh Gradient Background */
-  background-image:
-    radial-gradient(circle at 10% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.05) 0%, transparent 40%);
+  background-image: var(--data-bg-image);
   min-height: 100vh;
   overflow: hidden;
   /* App-like feel */

@@ -1,8 +1,46 @@
-import mqtt from 'mqtt';
-import dotenv from 'dotenv';
 import { saveAlert } from './db/storage.js';
 import { sendNotification } from './services/notifier.js';
 import { THRESHOLDS } from './config/thresholds.js';
+import { startServer } from './api.js';
+import { getRecommendation } from './services/ai.js';
+import dotenv from 'dotenv';
+import mqtt from 'mqtt';
+
+startServer();
+
+// ... (existing code top) ...
+
+// ... (middle code omitted for brevity in call) ...
+
+// We only need to replace the processData function part or imports? 
+// The tool works best with contiguous blocks. I'll target the imports first then the function body.
+// Wait, I can't do multiple replace in one tool call unless multi_replace.
+// I will target imports first in one tool call, then function body.
+// Actually, `replace_file_content` is single contiguous. 
+// I'll rewrite `processData` and the loop.
+
+// First, imports are handled by replacing line 1-6 above.
+// But wait, I need to see the file again to be sure of line numbers or context.
+// I already saw index.js in step 23 and 58.
+
+// Let's replace the whole file content or a large chunk to be safe? No, efficient use.
+// I'll do two replace calls. One for imports, one for the loop.
+// Tool list: 
+// 1. Write ai.js (done in this turn)
+// 2. Replace storage.js (done in this turn)
+// 3. Replace index.js imports
+// 4. Replace index.js processData loop
+// 5. Append .env
+
+// Wait, replace_file_content usage: "Do NOT make multiple parallel calls to this tool ... for the same file."
+// I must use multi_replace for index.js if I want to change imports AND body.
+
+// But first I need to check line numbers again to be safe? 
+// StartLine 1 imports...
+// Line 80ish loop...
+// Step 58 showed imports.
+
+// Let's add the key to .env first in its own file tool.
 
 dotenv.config();
 
@@ -75,12 +113,23 @@ async function processData(data) {
 
     // Process all generated alerts
     for (const alert of alerts) {
-        const fullAlert = { ...alert, sensor_id: data.sensor_id || 'unknown' };
+        let fullAlert = { ...alert, sensor_id: data.sensor_id || 'unknown' };
 
-        // 1. Notify
+        // 🤖 Get AI Recommendation
+        if (process.env.GEMINI_API_KEY) {
+            console.log(`🧠 Asking Gemini for advice on ${fullAlert.type}...`);
+            const advice = await getRecommendation(fullAlert.type, fullAlert.value, fullAlert.threshold);
+            if (advice) {
+                fullAlert.recommendation = advice;
+                console.log(`💡 Advice: ${advice}`);
+            }
+        }
+
+        // 1. Persist (with recommendation)
+        const id = await saveAlert(fullAlert);
+        fullAlert.id = id;
+
+        // 2. Notify (email content is standard, no AI)
         await sendNotification(fullAlert);
-
-        // 2. Persist
-        await saveAlert(fullAlert);
     }
 }

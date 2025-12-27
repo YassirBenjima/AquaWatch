@@ -114,6 +114,8 @@ services:
   alert-service:
     build: ./alert-service
     container_name: aquawatch_alert
+    ports:
+      - "3005:3000"
     depends_on:
       - mosquitto
       - timescaledb

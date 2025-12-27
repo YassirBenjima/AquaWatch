@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS sensor_data (
     turbidity FLOAT,
     conductivity FLOAT,
     latitude FLOAT,
-    longitude FLOAT,
+    longitude FLOAT
+);
 
 CREATE TABLE IF NOT EXISTS forecasts (
     id SERIAL PRIMARY KEY,
@@ -29,7 +30,8 @@ CREATE TABLE IF NOT EXISTS alerts (
     value FLOAT,
     threshold FLOAT,
     message TEXT,
-    severity VARCHAR(20)
+    severity VARCHAR(20),
+    recommendation TEXT
 );
 
 CREATE TABLE IF NOT EXISTS zones (
@@ -37,4 +39,12 @@ CREATE TABLE IF NOT EXISTS zones (
     name VARCHAR(50),
     geom GEOMETRY(Polygon, 4326),
     description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    email VARCHAR(255) PRIMARY KEY,
+    password_hash VARCHAR(255),
+    notifications_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_login TIMESTAMPTZ
 );

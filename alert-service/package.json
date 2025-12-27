@@ -12,6 +12,10 @@
         "mqtt": "^5.3.3",
         "nodemailer": "^6.9.7",
         "pg": "^8.11.3",
-        "axios": "^1.6.2"
+        "axios": "^1.6.2",
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "bcryptjs": "^2.4.3",
+        "@google/generative-ai": "^0.21.0"
     }
 }

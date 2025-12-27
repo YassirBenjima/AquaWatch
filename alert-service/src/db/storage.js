@@ -1,7 +1,7 @@
 import pg from 'pg';
 const { Pool } = pg;
 
-const pool = new Pool({
+export const pool = new Pool({
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
     database: process.env.PG_DB,
@@ -11,8 +11,8 @@ const pool = new Pool({
 
 export async function saveAlert(alert) {
     const query = `
-    INSERT INTO alerts (sensor_id, alert_type, value, threshold, message, severity, timestamp)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO alerts (sensor_id, alert_type, value, threshold, message, severity, recommendation, timestamp)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING id
   `;
     const values = [
@@ -22,6 +22,7 @@ export async function saveAlert(alert) {
         alert.threshold,
         alert.message,
         alert.severity,
+        alert.recommendation || null,
         new Date()
     ];
 

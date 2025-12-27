@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { pool } from '../db/storage.js';
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -25,9 +26,18 @@ export async function sendNotification(alert) {
     if (process.env.ENABLE_EMAIL !== 'true') return;
 
     try {
+        // Fetch recipients from DB
+        const res = await pool.query('SELECT email FROM users WHERE notifications_enabled = true');
+        const recipients = res.rows.map(row => row.email);
+
+        if (recipients.length === 0) {
+            console.log("[Email] No users subscribed to notifications.");
+            return;
+        }
+
         const info = await transporter.sendMail({
             from: '"AquaWatch Alert" <' + process.env.SMTP_USER + '>', // sender address
-            to: process.env.ALERT_EMAIL_RECIPIENT, // list of receivers
+            to: recipients.join(', '), // list of receivers
             subject: `⚠️ ALERTE AQUAWATCH: ${alert.type} - ${alert.severity}`, // Subject line
             text: `Alerte détectée sur le capteur ${alert.sensor_id}.\n\nType: ${alert.type}\nValeur: ${alert.value}\nSeuil: ${alert.threshold}\nMessage: ${alert.message}`, // plain text body
             html: `
