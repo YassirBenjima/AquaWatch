@@ -144,6 +144,20 @@ services:
     networks:
       - aquawatch_net
 
+  jenkins:
+    build: ./jenkins
+    container_name: aquawatch_jenkins
+    privileged: true
+    user: root
+    ports:
+      - "8085:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - aquawatch_net
+
 networks:
   aquawatch_net:
     driver: bridge
@@ -154,3 +168,4 @@ volumes:
   mosquitto_data:
   mosquitto_config:
   geoserver_data:
+  jenkins_data:
