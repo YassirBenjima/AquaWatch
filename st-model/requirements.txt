@@ -7,3 +7,5 @@ python-dotenv
 scipy
 sqlalchemy
 scikit-learn
+matplotlib
+seaborn

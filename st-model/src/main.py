@@ -42,17 +42,22 @@ def run_prediction_cycle():
             import traceback
             traceback.print_exc()
 
-        # --- RANDOM FOREST MODEL ---
+        # --- ADVANCED RF & POTABILITY MODEL ---
         try:
             from src.rf_model import RFModel
             rf = RFModel()
-            rf_pred = rf.train_and_predict(df)
+            rf_turb_pred, rf_pot_pred = rf.train_and_predict(df)
             
-            if rf_pred is not None:
-                print(f"[RFModel] Prediction: {rf_pred:.2f}")
-                loader.save_forecast(rf_pred, model_name="random_forest")
+            if rf_turb_pred is not None:
+                status = "POTABLE" if rf_pot_pred == 1 else "UNSAFE"
+                print(f"[RFModel] Turbidity Forecast: {rf_turb_pred:.2f} | Potability Assessment: {status}")
+                
+                # Save the turbidity forecast to DB (as before)
+                loader.save_forecast(rf_turb_pred, model_name="random_forest_v2")
+                
+                # In a future step, you might want to save the potability status to a dedicated table.
             else:
-                print("[RFModel] Could not generate prediction.")
+                print("[RFModel] Could not generate prediction (insufficient data).")
         except Exception as e:
             print(f"[RFModel] Error: {e}")
             import traceback
